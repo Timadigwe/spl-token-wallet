@@ -10,7 +10,32 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
     crypto: require.resolve('crypto-browserify'),
     stream: require.resolve('stream-browserify'),
     vm: require.resolve('vm-browserify'),
+    fs: false,
+    os: require.resolve('os-browserify/browser'),
+    path: require.resolve('path-browserify'),
   };
+
+  config.module.rules.push({
+    test: /\.js$/,
+    exclude: /node_modules/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: ['@babel/preset-env', '@babel/preset-react'],
+        plugins: ['@babel/plugin-proposal-class-properties'],
+      },
+    },
+  });
+
+  // Add support for WebAssembly
+  config.experiments = {
+    asyncWebAssembly: true, // Enable async WebAssembly support
+  };
+
+  config.module.rules.push({
+    test: /\.wasm$/,
+    type: 'webassembly/async', // Set the module type for WebAssembly files
+  });
 
   return config;
 });

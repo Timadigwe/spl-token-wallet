@@ -6,11 +6,12 @@ import {
   mnemonicToSeed,
   storeMnemonicAndSeed,
   normalizeMnemonic,
+  MnemonicAndSeed,
 } from '../utils/wallet-seed';
 import {
   getAccountFromSeed,
   DERIVATION_PATH,
-} from '../utils/walletProvider/localStorage.js';
+} from '../utils/walletProvider/localStorage';
 import {
   Container,
   Card,
@@ -30,13 +31,14 @@ import {
   Link,
 } from '@mui/material';
 import LoadingIndicator from '../components/LoadingIndicator';
-import { BalanceListItem } from '../components/BalancesList.js';
+//import { BalanceListItem } from '../components/BalancesList.js';
 import { useCallAsync } from '../utils/notifications';
 import { validateMnemonic } from 'bip39';
 import DialogForm from '../components/DialogForm';
+import { PublicKey } from '@solana/web3.js';
 
 export default function LoginPage() {
-  const [restore, setRestore] = useState(false);
+  const [restore, setRestore] = useState<boolean>(false);
   const [hasLockedMnemonicAndSeed, loading] = useHasLockedMnemonicAndSeed();
 
   if (loading) {
@@ -60,34 +62,100 @@ export default function LoginPage() {
   );
 }
 
+function LoginForm() {
+  const [password, setPassword] = useState<string>('');
+  const [stayLoggedIn, setStayLoggedIn] = useState<boolean>(false);
+  const callAsync = useCallAsync();
+
+  const submit = () => {
+    callAsync(loadMnemonicAndSeed(password, stayLoggedIn), {
+      progressMessage: 'Unlocking wallet...',
+      successMessage: 'Wallet unlocked',
+    });
+  };
+
+  const submitOnEnter = (e: React.KeyboardEvent) => {
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+      e.preventDefault();
+      e.stopPropagation();
+      submit();
+    }
+  };
+
+  const setPasswordOnChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setPassword(e.target.value);
+  const toggleStayLoggedIn = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setStayLoggedIn(e.target.checked);
+
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h5" gutterBottom>
+          Unlock Wallet
+        </Typography>
+        <TextField
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={setPasswordOnChange}
+          onKeyDown={submitOnEnter}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox checked={stayLoggedIn} onChange={toggleStayLoggedIn} />
+          }
+          label="Keep wallet unlocked"
+        />
+      </CardContent>
+      <CardActions style={{ justifyContent: 'flex-end' }}>
+        <Button color="primary" onClick={submit}>
+          Unlock
+        </Button>
+      </CardActions>
+    </Card>
+  );
+}
+
 function CreateWalletForm() {
-  const [mnemonicAndSeed, setMnemonicAndSeed] = useState(null);
+  const [mnemonicAndSeed, setMnemonicAndSeed] =
+    useState<MnemonicAndSeed | null>(null);
+  const [savedWords, setSavedWords] = useState<boolean>(false);
+  const callAsync = useCallAsync();
+
   useEffect(() => {
     generateMnemonicAndSeed().then(setMnemonicAndSeed);
   }, []);
-  const [savedWords, setSavedWords] = useState(false);
-  const callAsync = useCallAsync();
 
-  function submit(password) {
+  function submit(password: string) {
+    if (!mnemonicAndSeed) {
+      throw new Error('Mnemonic and seed are not generated yet');
+    }
     const { mnemonic, seed } = mnemonicAndSeed;
-    callAsync(
-      storeMnemonicAndSeed(
-        mnemonic,
-        seed,
-        password,
-        DERIVATION_PATH.bip44Change
-      ),
-      {
-        progressMessage: 'Creating wallet...',
-        successMessage: 'Wallet created',
-      }
-    );
+
+    if (mnemonic && seed) {
+      callAsync(
+        storeMnemonicAndSeed(
+          mnemonic,
+          seed,
+          password,
+          DERIVATION_PATH.bip44Change
+        ),
+        {
+          progressMessage: 'Creating wallet...',
+          successMessage: 'Wallet created',
+        }
+      );
+    }
   }
 
   if (!savedWords) {
     return (
       <SeedWordsForm
-        mnemonicAndSeed={mnemonicAndSeed}
+        mnemonic={mnemonicAndSeed ? mnemonicAndSeed.mnemonic : ''}
         goForward={() => setSavedWords(true)}
       />
     );
@@ -95,20 +163,26 @@ function CreateWalletForm() {
 
   return (
     <ChoosePasswordForm
-      mnemonicAndSeed={mnemonicAndSeed}
+      //mnemonicAndSeed={mnemonicAndSeed}
       goBack={() => setSavedWords(false)}
       onSubmit={submit}
     />
   );
 }
 
-function SeedWordsForm({ mnemonicAndSeed, goForward }) {
-  const [confirmed, setConfirmed] = useState(false);
-  const [downloaded, setDownloaded] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [seedCheck, setSeedCheck] = useState('');
+function SeedWordsForm({
+  mnemonic,
+  goForward,
+}: {
+  mnemonic: string | null;
+  goForward: () => void;
+}) {
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const [downloaded, setDownloaded] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [seedCheck, setSeedCheck] = useState<string>('');
 
-  const downloadMnemonic = (mnemonic) => {
+  const downloadMnemonic = (mnemonic: string) => {
     const url = window.URL.createObjectURL(new Blob([mnemonic]));
     const link = document.createElement('a');
     link.href = url;
@@ -131,13 +205,13 @@ function SeedWordsForm({ mnemonicAndSeed, goForward }) {
             Please write down the following twenty four words and keep them in a
             safe place:
           </Typography>
-          {mnemonicAndSeed ? (
+          {mnemonic ? (
             <TextField
               variant="outlined"
               fullWidth
               multiline
               margin="normal"
-              value={mnemonicAndSeed.mnemonic}
+              value={mnemonic}
               label="Seed Words"
               onFocus={(e) => e.currentTarget.select()}
             />
@@ -169,7 +243,7 @@ function SeedWordsForm({ mnemonicAndSeed, goForward }) {
             control={
               <Checkbox
                 checked={confirmed}
-                disabled={!mnemonicAndSeed}
+                disabled={!mnemonic}
                 onChange={(e) => setConfirmed(e.target.checked)}
               />
             }
@@ -181,7 +255,7 @@ function SeedWordsForm({ mnemonicAndSeed, goForward }) {
               color="primary"
               style={{ marginTop: 20 }}
               onClick={() => {
-                downloadMnemonic(mnemonicAndSeed?.mnemonic);
+                downloadMnemonic(mnemonic ? mnemonic : '');
                 setDownloaded(true);
               }}
             >
@@ -229,9 +303,7 @@ function SeedWordsForm({ mnemonicAndSeed, goForward }) {
           <Button
             type="submit"
             color="secondary"
-            disabled={
-              normalizeMnemonic(seedCheck) !== mnemonicAndSeed?.mnemonic
-            }
+            disabled={normalizeMnemonic(seedCheck) !== mnemonic}
           >
             Continue
           </Button>
@@ -241,9 +313,15 @@ function SeedWordsForm({ mnemonicAndSeed, goForward }) {
   );
 }
 
-function ChoosePasswordForm({ goBack, onSubmit }) {
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
+function ChoosePasswordForm({
+  goBack,
+  onSubmit,
+}: {
+  goBack: () => void;
+  onSubmit: (password: string) => void;
+}) {
+  const [password, setPassword] = useState<string>('');
+  const [passwordConfirm, setPasswordConfirm] = useState<string>('');
 
   return (
     <Card>
@@ -293,66 +371,12 @@ function ChoosePasswordForm({ goBack, onSubmit }) {
   );
 }
 
-function LoginForm() {
-  const [password, setPassword] = useState('');
-  const [stayLoggedIn, setStayLoggedIn] = useState(false);
-  const callAsync = useCallAsync();
-
-  const submit = () => {
-    callAsync(loadMnemonicAndSeed(password, stayLoggedIn), {
-      progressMessage: 'Unlocking wallet...',
-      successMessage: 'Wallet unlocked',
-    });
-  };
-  const submitOnEnter = (e) => {
-    if (e.code === 'Enter' || e.code === 'NumpadEnter') {
-      e.preventDefault();
-      e.stopPropagation();
-      submit();
-    }
-  };
-  const setPasswordOnChange = (e) => setPassword(e.target.value);
-  const toggleStayLoggedIn = (e) => setStayLoggedIn(e.target.checked);
-
-  return (
-    <Card>
-      <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Unlock Wallet
-        </Typography>
-        <TextField
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={setPasswordOnChange}
-          onKeyDown={submitOnEnter}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox checked={stayLoggedIn} onChange={toggleStayLoggedIn} />
-          }
-          label="Keep wallet unlocked"
-        />
-      </CardContent>
-      <CardActions style={{ justifyContent: 'flex-end' }}>
-        <Button color="primary" onClick={submit}>
-          Unlock
-        </Button>
-      </CardActions>
-    </Card>
-  );
-}
-
-function RestoreWalletForm({ goBack }) {
-  const [rawMnemonic, setRawMnemonic] = useState('');
-  const [seed, setSeed] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [next, setNext] = useState(false);
+function RestoreWalletForm({ goBack }: { goBack: () => void }) {
+  const [rawMnemonic, setRawMnemonic] = useState<string>('');
+  const [seed, setSeed] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [passwordConfirm, setPasswordConfirm] = useState<string>('');
+  const [next, setNext] = useState<boolean>(false);
 
   const mnemonic = normalizeMnemonic(rawMnemonic);
   const isNextBtnEnabled =
@@ -441,28 +465,42 @@ function RestoreWalletForm({ goBack }) {
   );
 }
 
-function DerivedAccounts({ goBack, mnemonic, seed, password }) {
+export enum DerivationPathMenuItemType {
+  Deprecated = 0,
+  Bip44 = 1,
+  Bip44Change = 2,
+  Bip44Root = 3,
+}
+
+function DerivedAccounts({
+  goBack,
+  mnemonic,
+  seed,
+  password,
+}: {
+  goBack: () => void;
+  mnemonic: string;
+  seed: string;
+  password: string;
+}) {
   const callAsync = useCallAsync();
-  const [dPathMenuItem, setDPathMenuItem] = useState(
-    DerivationPathMenuItem.Bip44Change
-  );
+  const [dPathMenuItem, setDPathMenuItem] =
+    useState<DerivationPathMenuItemType>(DerivationPathMenuItem.Bip44Change);
   const accounts = [...Array(10)].map((_, idx) => {
-    return getAccountFromSeed(
-      Buffer.from(seed, 'hex'),
-      idx,
-      toDerivationPath(dPathMenuItem)
-    );
+    const derivationPath = toDerivationPath(dPathMenuItem);
+    if (!derivationPath) {
+      throw new Error('Invalid derivation path');
+    }
+
+    return getAccountFromSeed(Buffer.from(seed, 'hex'), idx, derivationPath);
   });
 
   function submit() {
-    callAsync(
-      storeMnemonicAndSeed(
-        mnemonic,
-        seed,
-        password,
-        toDerivationPath(dPathMenuItem)
-      )
-    );
+    const derivationPath = toDerivationPath(dPathMenuItem);
+    if (!derivationPath) {
+      throw new Error('Invalid derivation path');
+    }
+    callAsync(storeMnemonicAndSeed(mnemonic, seed, password, derivationPath));
   }
 
   return (
@@ -483,6 +521,15 @@ function DerivedAccounts({ goBack, mnemonic, seed, password }) {
   );
 }
 
+interface AccountsSelectorProps {
+  showRoot?: boolean;
+  showDeprecated?: boolean;
+  accounts: Array<{ publicKey: PublicKey }>;
+  dPathMenuItem: DerivationPathMenuItemType;
+  setDPathMenuItem: (value: DerivationPathMenuItemType) => void;
+  onClick?: (account: { publicKey: PublicKey }) => void;
+}
+
 export function AccountsSelector({
   showRoot,
   showDeprecated,
@@ -490,7 +537,7 @@ export function AccountsSelector({
   dPathMenuItem,
   setDPathMenuItem,
   onClick,
-}) {
+}: AccountsSelectorProps) {
   return (
     <CardContent>
       <div
@@ -506,7 +553,7 @@ export function AccountsSelector({
           <Select
             value={dPathMenuItem}
             onChange={(e) => {
-              setDPathMenuItem(e.target.value);
+              setDPathMenuItem(e.target.value as DerivationPathMenuItemType);
             }}
           >
             {showRoot && (
@@ -530,19 +577,25 @@ export function AccountsSelector({
       </div>
       {accounts.map((acc) => {
         return (
-          <div onClick={onClick ? () => onClick(acc) : {}}>
-            <BalanceListItem
+          <div
+            key={acc.publicKey.toString()}
+            onClick={onClick ? () => onClick(acc) : undefined}
+          >
+            {/* <BalanceListItem
               key={acc.publicKey.toString()}
-              onClick={onClick}
+              onClick={onClick ? () => onClick(acc) : undefined}
               publicKey={acc.publicKey}
               expandable={false}
-            />
+            /> */}
+            Balance list Item
           </div>
         );
       })}
     </CardContent>
   );
 }
+
+type DerivationPath = 'bip44' | 'bip44Change' | 'bip44Root' | 'deprecated';
 
 // Material UI's Select doesn't render properly when using an `undefined` value,
 // so we define this type and the subsequent `toDerivationPath` translator as a
@@ -556,17 +609,19 @@ export const DerivationPathMenuItem = {
   Bip44Root: 3, // Ledger only.
 };
 
-export function toDerivationPath(dPathMenuItem) {
+function toDerivationPath(
+  dPathMenuItem: DerivationPathMenuItemType
+): DerivationPath | undefined {
   switch (dPathMenuItem) {
     case DerivationPathMenuItem.Deprecated:
-      return DERIVATION_PATH.deprecated;
+      return 'deprecated';
     case DerivationPathMenuItem.Bip44:
-      return DERIVATION_PATH.bip44;
+      return 'bip44';
     case DerivationPathMenuItem.Bip44Change:
-      return DERIVATION_PATH.bip44Change;
+      return 'bip44Change';
     case DerivationPathMenuItem.Bip44Root:
-      return DERIVATION_PATH.bip44Root;
+      return 'bip44Root';
     default:
-      throw new Error(`invalid derivation path: ${dPathMenuItem}`);
+      return undefined;
   }
 }

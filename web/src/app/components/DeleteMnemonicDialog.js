@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import DialogForm from './DialogForm';
 import {
-  forgetWallet,
+  //forgetWallet,
   normalizeMnemonic,
   useUnlockedMnemonicAndSeed,
 } from '../utils/wallet-seed';
@@ -22,7 +22,7 @@ export default function DeleteMnemonicDialog({ open, onClose }) {
         open={open}
         onClose={onClose}
         onSubmit={() => {
-          forgetWallet();
+          //forgetWallet();
           onClose();
         }}
         fullWidth

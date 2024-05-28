@@ -7,7 +7,7 @@ import {
 } from '@solana/web3.js';
 import { TokenInstructions } from '@project-serum/serum';
 import {
-  assertOwner,
+  //assertOwner,
   closeAccount,
   initializeAccount,
   initializeMint,
@@ -394,12 +394,12 @@ async function createAndTransferToAccount({
       mint
     );
   let transaction = new Transaction();
-  transaction.add(
-    assertOwner({
-      account: destinationPublicKey,
-      owner: SystemProgram.programId,
-    })
-  );
+  // transaction.add(
+  //   assertOwner({
+  //     account: destinationPublicKey,
+  //     owner: SystemProgram.programId,
+  //   })
+  // );
   transaction.add(createAccountInstruction);
   const transferBetweenAccountsTxn =
     createTransferBetweenSplTokenAccountsInstruction({

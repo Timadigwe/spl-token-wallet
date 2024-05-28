@@ -1,4 +1,4 @@
-import { pbkdf2 } from 'crypto';
+//import { pbkdf2 } from 'crypto';
 import { randomBytes, secretbox } from 'tweetnacl';
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
@@ -9,11 +9,11 @@ import { useEffect, useState } from 'react';
 
 const bip32 = BIP32Factory(ecc);
 
-interface MnemonicAndSeed {
+export interface MnemonicAndSeed {
   mnemonic: string | null;
   seed: string | null;
-  importsEncryptionKey: Buffer | null;
-  derivationPath: string | null;
+  importsEncryptionKey?: Buffer | null;
+  derivationPath?: string | null;
 }
 
 const EMPTY_MNEMONIC: MnemonicAndSeed = {
@@ -88,7 +88,7 @@ export function getUnlockedMnemonicAndSeed(): Promise<MnemonicAndSeed> {
   return unlockedMnemonicAndSeed;
 }
 
-// returns [mnemonic, loading]
+// // returns [mnemonic, loading]
 export function useUnlockedMnemonicAndSeed(): [MnemonicAndSeed, boolean] {
   const [currentUnlockedMnemonic, setCurrentUnlockedMnemonic] =
     useState<MnemonicAndSeed | null>(null);
@@ -143,7 +143,7 @@ export async function storeMnemonicAndSeed(
     const salt = randomBytes(16);
     const kdf = 'pbkdf2';
     const iterations = 100000;
-    const digest = 'sha256';
+    const digest = 'SHA-256';
     const key = await deriveEncryptionKey(password, salt, iterations, digest);
     const nonce = randomBytes(secretbox.nonceLength);
     const encrypted = secretbox(Buffer.from(plaintext), nonce, key);
@@ -231,29 +231,66 @@ export async function loadMnemonicAndSeed(
   return { mnemonic, seed, derivationPath };
 }
 
+// async function deriveEncryptionKey(
+//   password: string,
+//   salt: Uint8Array,
+//   iterations: number,
+//   digest: string
+// ): Promise<Uint8Array> {
+//   // Convert password to ArrayBuffer
+//   const enc = new TextEncoder();
+//   const passwordBuffer = enc.encode(password);
+//   return new Promise((resolve, reject) =>
+//     pbkdf2(
+//       password,
+//       salt,
+//       iterations,
+//       secretbox.keyLength,
+//       digest,
+//       (err, key) => (err ? reject(err) : resolve(new Uint8Array(key)))
+//     )
+//   );
+// }
+
 async function deriveEncryptionKey(
   password: string,
   salt: Uint8Array,
   iterations: number,
   digest: string
 ): Promise<Uint8Array> {
-  return new Promise((resolve, reject) =>
-    pbkdf2(
-      password,
-      salt,
-      iterations,
-      secretbox.keyLength,
-      digest,
-      (err, key) => (err ? reject(err) : resolve(new Uint8Array(key)))
-    )
+  // Convert password to ArrayBuffer
+  const enc = new TextEncoder();
+  const passwordBuffer = enc.encode(password);
+
+  // Import password as a key
+  const key = await crypto.subtle.importKey(
+    'raw', // raw format of the key - should be Uint8Array
+    passwordBuffer,
+    { name: 'PBKDF2' },
+    false, // not extractable
+    ['deriveBits']
   );
+
+  // Use PBKDF2 to derive a key
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: iterations,
+      hash: digest,
+    },
+    key,
+    256
+  );
+
+  return new Uint8Array(derivedBits);
 }
 
 export function lockWallet() {
   setUnlockedMnemonicAndSeed(null, null, null, null);
 }
 
-// Returns the 32 byte key used to encrypt imported private keys.
+// // Returns the 32 byte key used to encrypt imported private keys.
 function deriveImportsEncryptionKey(seed: string): Buffer | undefined {
   if (!seed) {
     return undefined;

@@ -13,20 +13,20 @@ import {
   SnackbarContent,
   Switch,
   Typography,
-} from '@material-ui/core';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import { makeStyles } from '@material-ui/core/styles';
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+} from '@mui/material';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
+import { makeStyles } from '@mui/styles';
 import assert from 'assert';
 import bs58 from 'bs58';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 import { useLocalStorageState, isExtension } from '../utils/utils';
-import SignTransactionFormContent from '../components/SignTransactionFormContent';
-import SignFormContent from '../components/SignFormContent';
-import { generateDiffieHelllman } from '../utils/diffie-hellman';
+//import SignTransactionFormContent from '../components/SignTransactionFormContent';
+//import SignFormContent from '../components/SignFormContent';
+//import { generateDiffieHelllman } from '../utils/diffie-hellman';
 
 const AUTHORIZED_METHODS = [
   'signTransaction',
@@ -88,7 +88,7 @@ export default function PopupPage({ opener }) {
         opener.postMessage({ jsonrpc: '2.0', ...message }, origin);
       }
     },
-    [opener, origin],
+    [opener, origin]
   );
 
   // Keep selectedWallet and wallet in sync.
@@ -238,7 +238,7 @@ export default function PopupPage({ opener }) {
         chrome.storage.local.get('connectedWallets', (result) => {
           // TODO better way to do this
           const account = accounts.find((account) =>
-            account.address.equals(wallet.publicKey),
+            account.address.equals(wallet.publicKey)
           );
           const connectedWallets = {
             ...(result.connectedWallets || {}),
@@ -306,7 +306,7 @@ export default function PopupPage({ opener }) {
       }
     } else {
       signatures = await Promise.all(
-        messages.map((m) => wallet.createSignature(m)),
+        messages.map((m) => wallet.createSignature(m))
       );
     }
     postMessage({
@@ -319,14 +319,14 @@ export default function PopupPage({ opener }) {
   }
 
   function diffieHellman(publicKey) {
-    const keys = generateDiffieHelllman(
-      publicKey,
-      wallet.provider.account.secretKey,
-    );
-    postMessage({
-      result: keys,
-      id: request.id,
-    });
+    // const keys = generateDiffieHelllman(
+    //   publicKey,
+    //   wallet.provider.account.secretKey
+    // );
+    // postMessage({
+    //   result: keys,
+    //   id: request.id,
+    // });
   }
 
   function sendReject() {
@@ -416,7 +416,7 @@ function ApproveConnectionForm({ origin, onApprove }) {
   const [autoApprove, setAutoApprove] = useState(false);
   let [dismissed, setDismissed] = useLocalStorageState(
     'dismissedAutoApproveWarning',
-    false,
+    false
   );
   return (
     <Card>
@@ -497,22 +497,24 @@ function ApproveSignatureForm({
   const renderFormContent = () => {
     if (messageDisplay === 'tx') {
       return (
-        <SignTransactionFormContent
-          autoApprove={autoApprove}
-          origin={origin}
-          messages={messages}
-          onApprove={onApprove}
-          buttonRef={buttonRef}
-        />
+        // <SignTransactionFormContent
+        //   autoApprove={autoApprove}
+        //   origin={origin}
+        //   messages={messages}
+        //   onApprove={onApprove}
+        //   buttonRef={buttonRef}
+        // />
+        <></>
       );
     } else {
       return (
-        <SignFormContent
-          origin={origin}
-          message={messages[0]}
-          messageDisplay={messageDisplay}
-          buttonRef={buttonRef}
-        />
+        // <SignFormContent
+        //   origin={origin}
+        //   message={messages[0]}
+        //   messageDisplay={messageDisplay}
+        //   buttonRef={buttonRef}
+        // />
+        <></>
       );
     }
   };

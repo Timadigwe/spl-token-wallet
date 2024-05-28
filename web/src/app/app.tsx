@@ -12,28 +12,24 @@ import {
   Button,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from 'tss-react/mui';
 import { blue } from '@mui/material/colors';
 import { SnackbarProvider } from 'notistack';
 import LoadingIndicator from './components/LoadingIndicator';
 import DialogForm from './components/DialogForm';
-// @ts-ignore
 import NavigationFrame from './components/NavigationFrame';
 import { ConnectionProvider } from './utils/connection';
-// @ts-ignore
 import { useWallet, WalletProvider } from './utils/wallet';
 import { ConnectedWalletsProvider } from './utils/connected-wallets';
-import { TokenRegistryProvider } from './utils/tokens/names';
+// import { TokenRegistryProvider } from './utils/tokens/names';
 import { isExtension } from './utils/utils';
-// @ts-ignore
-import PopupPage from './pages/PopupPage';
-// @ts-ignore
+// // @ts-ignore
+// import PopupPage from './pages/PopupPage';
 import LoginPage from './pages/LoginPage';
-// @ts-ignore
-import ConnectionsPage from './pages/ConnectionsPage';
-// @ts-ignore
-import WalletPage from './pages/WalletPage';
-// @ts-ignore
+// // @ts-ignore
+// import ConnectionsPage from './pages/ConnectionsPage';
+// // @ts-ignore
+// import WalletPage from './pages/WalletPage';
 import { PageProvider, usePage } from './utils/page';
 
 export function App() {
@@ -53,7 +49,7 @@ export function App() {
     [prefersDarkMode]
   );
 
-  // Disallow rendering inside an iframe to prevent clickjacking.
+  // // Disallow rendering inside an iframe to prevent clickjacking.
   if (window.self !== window.top) {
     return null;
   }
@@ -79,10 +75,9 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ConnectionProvider>
-          <SnackbarProvider
-            maxSnack={5}
-            autoHideDuration={8000}
-          ></SnackbarProvider>
+          <SnackbarProvider maxSnack={5} autoHideDuration={8000}>
+            <WalletProvider>{appElement}</WalletProvider>
+          </SnackbarProvider>
         </ConnectionProvider>
       </ThemeProvider>
     </Suspense>
@@ -112,24 +107,29 @@ function PageContents() {
     );
   }
   if (window.opener) {
-    return <PopupPage opener={window.opener} />;
+    //return <PopupPage opener={window.opener} />;
+    return <div>Pop up page</div>;
   }
   if (page === 'wallet') {
-    return <WalletPage />;
+    //return <WalletPage />;
+    return <div>Wallet page</div>;
   } else if (page === 'connections') {
-    return <ConnectionsPage />;
+    // return <ConnectionsPage />;
+    return <div>Connections page</div>;
   }
 }
 
-const useStyles = makeStyles(() => ({
-  walletButton: {
-    width: '100%',
-    padding: '16px',
-    '&:hover': {
-      cursor: 'pointer',
+const useStyles = makeStyles()(() => {
+  return {
+    walletButton: {
+      width: '100%',
+      padding: '16px',
+      '&:hover': {
+        cursor: 'pointer',
+      },
     },
-  },
-}));
+  };
+});
 
 interface WalletSuggestionDialogProps {
   open: boolean;
@@ -142,7 +142,7 @@ function WalletSuggestionDialog({
   onClose,
   onIgnore,
 }: WalletSuggestionDialogProps) {
-  const classes = useStyles();
+  const { classes } = useStyles();
   return (
     <DialogForm open={open} onClose={onClose} fullWidth>
       <DialogTitle>Looking for a Wallet?</DialogTitle>
@@ -152,7 +152,7 @@ function WalletSuggestionDialog({
           <b>Backpack</b>
         </Typography>
         <List disablePadding style={{ marginTop: '16px' }}>
-          <ListItem button disablePadding style={{ padding: 0 }}>
+          <ListItem disablePadding style={{ padding: 0 }}>
             <div
               className={classes.walletButton}
               style={{ display: 'flex' }}

@@ -54,6 +54,7 @@
     "stream-browserify": "3.0.0",
     "tiny-secp256k1": "^2.2.3",
     "tslib": "^2.3.0",
+    "tss-react": "^4.9.10",
     "tweetnacl": "^1.0.3",
     "vm-browserify": "^1.1.2"
   },

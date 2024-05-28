@@ -1,6 +1,7 @@
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
 import { DERIVATION_PATH } from './localStorage';
-const bs58 = require('bs58');
+import bs58 from 'bs58';
+import Transport from '@ledgerhq/hw-transport';
 
 const INS_GET_PUBKEY = 0x05;
 const INS_SIGN_MESSAGE = 0x06;
@@ -15,16 +16,30 @@ const MAX_PAYLOAD = 255;
 
 const LEDGER_CLA = 0xe0;
 
+// interface DerivationPath {
+//   bip44Change: string;
+//   bip44: string;
+//   bip44Root: string;
+// }
+
 /*
  * Helper for chunked send of large payloads
  */
-async function solana_send(transport, instruction, p1, payload) {
-  var p2 = 0;
-  var payload_offset = 0;
+async function solana_send(
+  transport: Transport,
+  instruction: number,
+  p1: number,
+  payload: Buffer
+) {
+  let p2 = 0;
+  let payload_offset = 0;
 
   if (payload.length > MAX_PAYLOAD) {
     while (payload.length - payload_offset > MAX_PAYLOAD) {
-      const buf = payload.slice(payload_offset, payload_offset + MAX_PAYLOAD);
+      const buf = payload.subarray(
+        payload_offset,
+        payload_offset + MAX_PAYLOAD
+      );
       payload_offset += MAX_PAYLOAD;
       console.log(
         'send',
@@ -41,32 +56,37 @@ async function solana_send(transport, instruction, p1, payload) {
       );
       if (reply.length !== 2) {
         throw new Error(
-          'solana_send: Received unexpected reply payload',
-          'UnexpectedReplyPayload'
+          'solana_send: Received unexpected reply payload, UnexpectedReplyPayload'
         );
       }
       p2 |= P2_EXTEND;
     }
   }
 
-  const buf = payload.slice(payload_offset);
+  const buf = payload.subarray(payload_offset);
   console.log('send', p2.toString(16), buf.length.toString(16), buf);
   const reply = await transport.send(LEDGER_CLA, instruction, p1, p2, buf);
 
-  return reply.slice(0, reply.length - 2);
+  return reply.subarray(0, reply.length - 2);
 }
 
 const BIP32_HARDENED_BIT = (1 << 31) >>> 0;
-function _harden(n) {
+
+function _harden(n: number) {
   return (n | BIP32_HARDENED_BIT) >>> 0;
 }
 
-export function solana_derivation_path(account, change, derivationPath) {
-  let useAccount = account ? account : 0;
-  let useChange = change ? change : 0;
-  derivationPath = derivationPath
-    ? derivationPath
-    : DERIVATION_PATH.bip44Change;
+export function solana_derivation_path(
+  account?: number,
+  change?: number,
+  derivationPath: string = DERIVATION_PATH.bip44Change
+) {
+  const useAccount = account ?? 0;
+  const useChange = change ?? 0;
+
+  // derivationPath = derivationPath
+  //   ? derivationPath
+  //   : DERIVATION_PATH.bip44Change;
 
   if (derivationPath === DERIVATION_PATH.bip44Root) {
     const length = 2;
@@ -100,7 +120,10 @@ export function solana_derivation_path(account, change, derivationPath) {
   }
 }
 
-async function solana_ledger_get_pubkey(transport, derivation_path) {
+async function solana_ledger_get_pubkey(
+  transport: Transport,
+  derivation_path: Buffer
+) {
   return solana_send(
     transport,
     INS_GET_PUBKEY,
@@ -110,27 +133,27 @@ async function solana_ledger_get_pubkey(transport, derivation_path) {
 }
 
 export async function solana_ledger_sign_transaction(
-  transport,
-  derivation_path,
-  transaction
+  transport: Transport,
+  derivation_path: Buffer,
+  transaction: Transaction
 ) {
   const msg_bytes = transaction.serializeMessage();
   return solana_ledger_sign_bytes(transport, derivation_path, msg_bytes);
 }
 
 export async function solana_ledger_sign_bytes(
-  transport,
-  derivation_path,
-  msg_bytes
+  transport: Transport,
+  derivation_path: Buffer,
+  msg_bytes: Buffer
 ) {
-  var num_paths = Buffer.alloc(1);
+  const num_paths = Buffer.alloc(1);
   num_paths.writeUInt8(1);
   const payload = Buffer.concat([num_paths, derivation_path, msg_bytes]);
 
   return solana_send(transport, INS_SIGN_MESSAGE, P1_CONFIRM, payload);
 }
 
-export async function getPublicKey(transport, path) {
+export async function getPublicKey(transport: Transport, path: Buffer) {
   let from_derivation_path;
   if (path) {
     from_derivation_path = path;
@@ -147,8 +170,8 @@ export async function getPublicKey(transport, path) {
 }
 
 export async function solana_ledger_confirm_public_key(
-  transport,
-  derivation_path
+  transport: Transport,
+  derivation_path: Buffer
 ) {
   return await solana_send(
     transport,

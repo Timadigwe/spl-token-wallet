@@ -1,8 +1,7 @@
 import React from 'react';
-import Container from '@material-ui/core/Container';
+import { Container, Grid } from '@mui/material';
 import BalancesList from '../components/BalancesList';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { useIsExtensionWidth } from '../utils/utils';
 
 const useStyles = makeStyles((theme) => ({

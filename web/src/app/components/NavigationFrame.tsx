@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, ReactNode, MouseEvent } from 'react';
 import {
   Toolbar,
   AppBar,
@@ -12,8 +12,9 @@ import {
   Hidden,
   IconButton,
   Badge,
+  Theme,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from 'tss-react/mui';
 import { useConnectionConfig } from '../utils/connection';
 import {
   clusterForEndpoint,
@@ -30,10 +31,10 @@ import CodeIcon from '@mui/icons-material/Code';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import { MonetizationOn, OpenInNew } from '@mui/icons-material';
 import SolanaIcon from './SolanaIcon';
-import { useWalletSelector } from '../utils/wallet';
-import DeleteMnemonicDialog from './DeleteMnemonicDialog';
-import AddHardwareWalletDialog from './AddHarwareWalletDialog';
-import { ExportMnemonicDialog } from './ExportAccountDialog.js';
+//import { useWalletSelector } from '../utils/wallet';
+//import DeleteMnemonicDialog from './DeleteMnemonicDialog';
+// import AddHardwareWalletDialog from './AddHarwareWalletDialog';
+// import { ExportMnemonicDialog } from './ExportAccountDialog.js';
 import AddCustomClusterDialog from './AddCustomClusterDialog';
 import {
   isExtension,
@@ -44,35 +45,37 @@ import ConnectionIcon from './ConnectionIcon';
 import { useConnectedWallets } from '../utils/connected-wallets';
 import { usePage } from '../utils/page';
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    flexGrow: 1,
-    paddingBottom: theme.spacing(3),
-    [theme.breakpoints.up(theme.ext)]: {
-      paddingTop: theme.spacing(3),
-      paddingLeft: theme.spacing(1),
-      paddingRight: theme.spacing(1),
+const useStyles = makeStyles()((theme: Theme) => {
+  return {
+    content: {
+      flexGrow: 1,
+      paddingBottom: theme.spacing(3),
+      [theme.breakpoints.down('sm')]: {
+        paddingTop: theme.spacing(3),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
+      },
     },
-  },
-  title: {
-    flexGrow: 1,
-  },
-  button: {
-    marginLeft: theme.spacing(1),
-  },
-  menuItemIcon: {
-    minWidth: 32,
-  },
-  badge: {
-    backgroundColor: theme.palette.success.main,
-    color: theme.palette.text.main,
-    height: 16,
-    width: 16,
-  },
-}));
+    title: {
+      flexGrow: 1,
+    },
+    button: {
+      marginLeft: theme.spacing(1),
+    },
+    menuItemIcon: {
+      minWidth: 32,
+    },
+    badge: {
+      backgroundColor: theme.palette.success.main,
+      color: theme.palette.text.primary,
+      height: 16,
+      width: 16,
+    },
+  };
+});
 
-export default function NavigationFrame({ children }) {
-  const classes = useStyles();
+export default function NavigationFrame({ children }: { children: ReactNode }) {
+  const { classes } = useStyles();
   const isExtensionWidth = useIsExtensionWidth();
   return (
     <>
@@ -115,7 +118,7 @@ function NavigationButtons() {
     return null;
   }
 
-  let elements = [];
+  let elements: ReactNode[] = [];
   if (page === 'wallet') {
     elements = [
       isExtension && <ConnectionsButton />,
@@ -148,7 +151,7 @@ function ExpandButton() {
 }
 
 function WalletButton() {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const setPage = usePage()[1];
   const onClick = () => setPage('wallet');
 
@@ -171,12 +174,14 @@ function WalletButton() {
 }
 
 function ConnectionsButton() {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const setPage = usePage()[1];
   const onClick = () => setPage('connections');
   const connectedWallets = useConnectedWallets();
 
-  const connectionAmount = Object.keys(connectedWallets).length;
+  const connectionAmount = connectedWallets
+    ? Object.keys(connectedWallets.connectedWallets).length
+    : 0;
 
   return (
     <>
@@ -209,9 +214,9 @@ function ConnectionsButton() {
 function NetworkSelector() {
   const { endpoint, setEndpoint } = useConnectionConfig();
   const cluster = useMemo(() => clusterForEndpoint(endpoint), [endpoint]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addCustomNetworkOpen, setCustomNetworkOpen] = useState(false);
-  const classes = useStyles();
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [addCustomNetworkOpen, setCustomNetworkOpen] = useState<boolean>(false);
+  const { classes } = useStyles();
 
   return (
     <>
@@ -226,7 +231,9 @@ function NetworkSelector() {
       <Hidden xsDown>
         <Button
           color="inherit"
-          onClick={(e) => setAnchorEl(e.target)}
+          onClick={(e: MouseEvent<HTMLButtonElement>) =>
+            setAnchorEl(e.currentTarget as HTMLElement)
+          }
           className={classes.button}
         >
           {cluster?.label ?? 'Network'}
@@ -234,7 +241,12 @@ function NetworkSelector() {
       </Hidden>
       <Hidden smUp>
         <Tooltip title="Select Network" arrow>
-          <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
+          <IconButton
+            color="inherit"
+            onClick={(e: MouseEvent<HTMLButtonElement>) =>
+              setAnchorEl(e.currentTarget as HTMLElement)
+            }
+          >
             <SolanaIcon />
           </IconButton>
         </Tooltip>
@@ -247,7 +259,7 @@ function NetworkSelector() {
           vertical: 'bottom',
           horizontal: 'right',
         }}
-        getContentAnchorEl={null}
+        //getContentAnchorEl={null}
       >
         {getClusters().map((cluster) => (
           <MenuItem
@@ -284,28 +296,28 @@ function NetworkSelector() {
 }
 
 function WalletSelector() {
-  const {
-    accounts,
-    derivedAccounts,
-    hardwareWalletAccount,
-    setHardwareWalletAccount,
-    setWalletSelector,
-    addAccount,
-  } = useWalletSelector();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addAccountOpen, setAddAccountOpen] = useState(false);
+  // const {
+  //   accounts,
+  //   derivedAccounts,
+  //   hardwareWalletAccount,
+  //   setHardwareWalletAccount,
+  //   setWalletSelector,
+  //   addAccount,
+  // } = useWalletSelector();
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [addAccountOpen, setAddAccountOpen] = useState<boolean>(false);
   const [addHardwareWalletDialogOpen, setAddHardwareWalletDialogOpen] =
-    useState(false);
-  const [deleteMnemonicOpen, setDeleteMnemonicOpen] = useState(false);
-  const [exportMnemonicOpen, setExportMnemonicOpen] = useState(false);
-  const classes = useStyles();
+    useState<boolean>(false);
+  const [deleteMnemonicOpen, setDeleteMnemonicOpen] = useState<boolean>(false);
+  const [exportMnemonicOpen, setExportMnemonicOpen] = useState<boolean>(false);
+  const { classes } = useStyles();
 
-  if (accounts.length === 0) {
-    return null;
-  }
+  // if (accounts.length === 0) {
+  //   return null;
+  // }
   return (
     <>
-      <AddHardwareWalletDialog
+      {/* <AddHardwareWalletDialog
         open={addHardwareWalletDialogOpen}
         onClose={() => setAddHardwareWalletDialogOpen(false)}
         onAdd={({ publicKey, derivationPath, account, change }) => {
@@ -327,8 +339,8 @@ function WalletSelector() {
             change,
           });
         }}
-      />
-      <AddAccountDialog
+      /> */}
+      {/* <AddAccountDialog
         open={addAccountOpen}
         onClose={() => setAddAccountOpen(false)}
         onAdd={({ name, importedAccount }) => {
@@ -342,19 +354,21 @@ function WalletSelector() {
           });
           setAddAccountOpen(false);
         }}
-      />
-      <ExportMnemonicDialog
+      /> */}
+      {/* <ExportMnemonicDialog
         open={exportMnemonicOpen}
         onClose={() => setExportMnemonicOpen(false)}
       />
       <DeleteMnemonicDialog
         open={deleteMnemonicOpen}
         onClose={() => setDeleteMnemonicOpen(false)}
-      />
+      /> */}
       <Hidden xsDown>
         <Button
           color="inherit"
-          onClick={(e) => setAnchorEl(e.target)}
+          onClick={(e: MouseEvent<HTMLButtonElement>) =>
+            setAnchorEl(e.currentTarget as HTMLElement)
+          }
           className={classes.button}
         >
           Account
@@ -362,7 +376,12 @@ function WalletSelector() {
       </Hidden>
       <Hidden smUp>
         <Tooltip title="Select Account" arrow>
-          <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
+          <IconButton
+            color="inherit"
+            onClick={(e: MouseEvent<HTMLButtonElement>) =>
+              setAnchorEl(e.currentTarget as HTMLElement)
+            }
+          >
             <AccountIcon />
           </IconButton>
         </Tooltip>
@@ -375,17 +394,17 @@ function WalletSelector() {
           vertical: 'bottom',
           horizontal: 'right',
         }}
-        getContentAnchorEl={null}
+        //getContentAnchorEl={null}
       >
-        {accounts.map((account) => (
+        {/* {accounts.map((account) => (
           <AccountListItem
             account={account}
             classes={classes}
             setAnchorEl={setAnchorEl}
             setWalletSelector={setWalletSelector}
           />
-        ))}
-        {hardwareWalletAccount && (
+        ))} */}
+        {/* {hardwareWalletAccount && (
           <>
             <Divider />
             <AccountListItem
@@ -395,7 +414,7 @@ function WalletSelector() {
               setWalletSelector={setWalletSelector}
             />
           </>
-        )}
+        )} */}
         <Divider />
         <MenuItem onClick={() => setAddHardwareWalletDialogOpen(true)}>
           <ListItemIcon className={classes.menuItemIcon}>
@@ -441,16 +460,18 @@ function WalletSelector() {
   );
 }
 
-const useFooterStyles = makeStyles((theme) => ({
-  footer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    margin: theme.spacing(2),
-  },
-}));
+const useFooterStyles = makeStyles()((theme) => {
+  return {
+    footer: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      margin: theme.spacing(2),
+    },
+  };
+});
 
 function Footer() {
-  const classes = useFooterStyles();
+  const { classes } = useFooterStyles();
   return (
     <footer className={classes.footer}>
       <Button
@@ -468,26 +489,26 @@ function Footer() {
   );
 }
 
-function AccountListItem({ account, classes, setAnchorEl, setWalletSelector }) {
-  return (
-    <MenuItem
-      key={account.address.toBase58()}
-      onClick={() => {
-        setAnchorEl(null);
-        setWalletSelector(account.selector);
-      }}
-      selected={account.isSelected}
-      component="div"
-    >
-      <ListItemIcon className={classes.menuItemIcon}>
-        {account.isSelected ? <CheckIcon fontSize="small" /> : null}
-      </ListItemIcon>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <Typography>{account.name}</Typography>
-        <Typography color="textSecondary">
-          {account.address.toBase58()}
-        </Typography>
-      </div>
-    </MenuItem>
-  );
-}
+// function AccountListItem({ account, classes, setAnchorEl, setWalletSelector }) {
+//   return (
+//     <MenuItem
+//       key={account.address.toBase58()}
+//       onClick={() => {
+//         setAnchorEl(null);
+//         setWalletSelector(account.selector);
+//       }}
+//       selected={account.isSelected}
+//       component="div"
+//     >
+//       <ListItemIcon className={classes.menuItemIcon}>
+//         {account.isSelected ? <CheckIcon fontSize="small" /> : null}
+//       </ListItemIcon>
+//       <div style={{ display: 'flex', flexDirection: 'column' }}>
+//         <Typography>{account.name}</Typography>
+//         <Typography color="textSecondary">
+//           {account.address.toBase58()}
+//         </Typography>
+//       </div>
+//     </MenuItem>
+//   );
+// }

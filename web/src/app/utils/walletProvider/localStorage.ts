@@ -91,7 +91,6 @@ export class LocalStorageWalletProvider {
   }
 
   async signTransaction(transaction: Transaction) {
-    // Adjust the type of transaction according to your needs
     transaction.partialSign(this.account);
     return transaction;
   }

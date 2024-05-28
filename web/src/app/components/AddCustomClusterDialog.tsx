@@ -8,9 +8,19 @@ import {
 } from '@mui/material';
 import DialogForm from './DialogForm';
 
-export default function AddCustomClusterDialog({ open, onAdd, onClose }) {
-  const [name, setName] = useState('');
-  const [apiUrl, setApiUrl] = useState('');
+interface AddCustomClusterDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onAdd: (data: { name: string; apiUrl: string }) => void;
+}
+
+const AddCustomClusterDialog: React.FC<AddCustomClusterDialogProps> = ({
+  open,
+  onAdd,
+  onClose,
+}) => {
+  const [name, setName] = useState<string>('');
+  const [apiUrl, setApiUrl] = useState<string>('');
 
   return (
     <DialogForm
@@ -57,4 +67,6 @@ export default function AddCustomClusterDialog({ open, onAdd, onClose }) {
       </DialogActions>
     </DialogForm>
   );
-}
+};
+
+export default AddCustomClusterDialog;
