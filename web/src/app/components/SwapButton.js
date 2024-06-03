@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import SwapHoriz from '@mui/icons-material/SwapHoriz';
 import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
-//import Swap from '@project-serum/swap-ui';
+import Swap from '@project-serum/swap-ui';
 import { Provider } from '@project-serum/anchor';
 import { TokenListContainer } from '@solana/spl-token-registry';
 import { useTokenInfos } from '../utils/tokens/names';
@@ -55,14 +55,14 @@ function SwapButtonDialog({ size }) {
             height: '100%',
           }}
         >
-          {/* <Swap
+          <Swap
             provider={provider}
             tokenList={tokenList}
             containerStyle={{
               width: '100%',
               boxShadow: 'none',
             }}
-          /> */}
+          />
           <DialogActions>
             <Button onClick={() => setDialogOpen(false)}>Close</Button>
           </DialogActions>

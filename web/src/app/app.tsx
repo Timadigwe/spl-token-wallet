@@ -21,7 +21,6 @@ import NavigationFrame from './components/NavigationFrame';
 import { ConnectionProvider } from './utils/connection';
 import { useWallet, WalletProvider } from './utils/wallet.js';
 import { ConnectedWalletsProvider } from './utils/connected-wallets';
-// import { TokenRegistryProvider } from './utils/tokens/names';
 import { isExtension } from './utils/utils';
 // // @ts-ignore
 // import PopupPage from './pages/PopupPage';
@@ -31,6 +30,7 @@ import LoginPage from './pages/LoginPage';
 // // @ts-ignore
 import WalletPage from './pages/WalletPage.js';
 import { PageProvider, usePage } from './utils/page';
+import { TokenRegistryProvider } from './utils/tokens/names';
 
 export function App() {
   // TODO: add toggle for dark mode
@@ -75,9 +75,11 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ConnectionProvider>
-          <SnackbarProvider maxSnack={5} autoHideDuration={8000}>
-            <WalletProvider>{appElement}</WalletProvider>
-          </SnackbarProvider>
+          <TokenRegistryProvider>
+            <SnackbarProvider maxSnack={5} autoHideDuration={8000}>
+              <WalletProvider>{appElement}</WalletProvider>
+            </SnackbarProvider>
+          </TokenRegistryProvider>
         </ConnectionProvider>
       </ThemeProvider>
     </Suspense>

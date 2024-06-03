@@ -1,5 +1,6 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), withReact(), (config) => {
@@ -36,6 +37,20 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
     test: /\.wasm$/,
     type: 'webassembly/async', // Set the module type for WebAssembly files
   });
+
+  // Add ForkTsCheckerWebpackPlugin
+  config.plugins.push(
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+      typescript: {
+        memoryLimit: 2048, // Set the memory limit (in MB)
+        diagnosticOptions: {
+          semantic: true,
+          syntactic: true,
+        },
+      },
+    })
+  );
 
   return config;
 });
