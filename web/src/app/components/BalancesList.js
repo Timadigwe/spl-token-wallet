@@ -8,13 +8,13 @@ import {
   Collapse,
   Typography,
   Link,
-  makeStyles,
   Button,
   AppBar,
   Toolbar,
   IconButton,
   Tooltip,
 } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
 import {
   refreshWalletPublicKeys,
   useBalanceInfo,
@@ -24,8 +24,8 @@ import {
 } from '../utils/wallet';
 import { findAssociatedTokenAddress } from '../utils/tokens';
 import LoadingIndicator from './LoadingIndicator';
-import TokenInfoDialog from './TokenInfoDialog';
-import FtxPayDialog from './FtxPay/FtxPayDialog';
+// import TokenInfoDialog from './TokenInfoDialog';
+// import FtxPayDialog from './FtxPay/FtxPayDialog';
 
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -41,10 +41,10 @@ import MergeType from '@mui/icons-material/MergeType';
 import SortIcon from '@mui/icons-material/Sort';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddTokenDialog from './AddTokenDialog';
-import ExportAccountDialog from './ExportAccountDialog';
+// import ExportAccountDialog from './ExportAccountDialog';
 import ftxPayIcon from './FtxPay/icon.png';
-import SendDialog from './SendDialog';
-import DepositDialog from './DepositDialog';
+// import SendDialog from './SendDialog';
+// import DepositDialog from './DepositDialog';
 import {
   //useIsProdNetwork,
   refreshAccountInfo,
@@ -59,10 +59,10 @@ import { serumMarkets, priceStore } from '../utils/markets';
 import { showTokenInfoDialog } from '../utils/config';
 import { useConnection } from '../utils/connection';
 import { shortenAddress } from '../utils/utils';
-import CloseTokenAccountDialog from './CloseTokenAccountButton';
+// import CloseTokenAccountDialog from './CloseTokenAccountButton';
 import TokenIcon from './TokenIcon';
-import EditAccountNameDialog from './EditAccountNameDialog';
-import MergeAccountsDialog from './MergeAccountsDialog';
+// import EditAccountNameDialog from './EditAccountNameDialog';
+// import MergeAccountsDialog from './MergeAccountsDialog';
 import SwapButton from './SwapButton';
 import DnsIcon from '@mui/icons-material/Dns';
 import DomainsList from './DomainsList';
@@ -153,6 +153,7 @@ export default function BalancesList() {
       }
     });
   }
+
   const totalUsdValue = publicKeys
     .filter((pk) => usdValues[pk.toString()])
     .map((pk) => usdValues[pk.toString()])
@@ -344,12 +345,12 @@ export default function BalancesList() {
         open={showAddTokenDialog}
         onClose={() => setShowAddTokenDialog(false)}
       />
-      <FtxPayDialog
+      {/* <FtxPayDialog
         open={showFtxPayDialog}
         publicKeys={publicKeys}
         onClose={() => setShowFtxPayDialog(false)}
-      />
-      <EditAccountNameDialog
+      /> */}
+      {/* <EditAccountNameDialog
         open={showEditAccountNameDialog}
         onClose={() => setShowEditAccountNameDialog(false)}
         oldName={selectedAccount ? selectedAccount.name : ''}
@@ -357,37 +358,39 @@ export default function BalancesList() {
           setAccountName(selectedAccount.selector, name);
           setShowEditAccountNameDialog(false);
         }}
-      />
-      <MergeAccountsDialog
+      /> */}
+      {/* <MergeAccountsDialog
         open={showMergeAccounts}
         onClose={() => setShowMergeAccounts(false)}
-      />
+      /> */}
     </Paper>
   );
 }
 
-const useStyles = makeStyles((theme) => ({
-  address: {
-    textOverflow: 'ellipsis',
-    overflowX: 'hidden',
-  },
-  itemDetails: {
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
-    marginBottom: theme.spacing(2),
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'space-evenly',
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  viewDetails: {
-    '&:hover': {
-      cursor: 'pointer',
+const useStyles = makeStyles()((theme) => {
+  return {
+    address: {
+      textOverflow: 'ellipsis',
+      overflowX: 'hidden',
     },
-  },
-}));
+    itemDetails: {
+      marginLeft: theme.spacing(3),
+      marginRight: theme.spacing(3),
+      marginBottom: theme.spacing(2),
+    },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'space-evenly',
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+    },
+    viewDetails: {
+      '&:hover': {
+        cursor: 'pointer',
+      },
+    },
+  };
+});
 
 export function BalanceListItem({ publicKey, expandable, setUsdValue }) {
   const wallet = useWallet();
@@ -714,10 +717,11 @@ function BalanceListItemDetails({
   return (
     <>
       {wallet.allowsExport && (
-        <ExportAccountDialog
-          onClose={() => setExportAccDialogOpen(false)}
-          open={exportAccDialogOpen}
-        />
+        // <ExportAccountDialog
+        //   onClose={() => setExportAccDialogOpen(false)}
+        //   open={exportAccDialogOpen}
+        // />
+        <div>ExportAccountDialog</div>
       )}
       <div className={classes.itemDetails}>
         <div className={classes.buttonContainer}>
@@ -763,32 +767,32 @@ function BalanceListItemDetails({
         </div>
         {additionalInfo}
       </div>
-      <SendDialog
+      {/* <SendDialog
         open={sendDialogOpen}
         onClose={() => setSendDialogOpen(false)}
         balanceInfo={balanceInfo}
         publicKey={publicKey}
-      />
-      <DepositDialog
+      /> */}
+      {/* <DepositDialog
         open={depositDialogOpen}
         onClose={() => setDepositDialogOpen(false)}
         balanceInfo={balanceInfo}
         publicKey={publicKey}
         //swapInfo={swapInfo}
         isAssociatedToken={isAssociatedToken}
-      />
-      <TokenInfoDialog
+      /> */}
+      {/* <TokenInfoDialog
         open={tokenInfoDialogOpen}
         onClose={() => setTokenInfoDialogOpen(false)}
         balanceInfo={balanceInfo}
         publicKey={publicKey}
-      />
-      <CloseTokenAccountDialog
+      /> */}
+      {/* <CloseTokenAccountDialog
         open={closeTokenAccountDialogOpen}
         onClose={() => setCloseTokenAccountDialogOpen(false)}
         balanceInfo={balanceInfo}
         publicKey={publicKey}
-      />
+      /> */}
     </>
   );
 }

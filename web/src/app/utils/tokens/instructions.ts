@@ -66,7 +66,7 @@ export function initializeMint({
   decimals,
   mintAuthority,
   freezeAuthority,
-}: { mint: PublicKey } & InitializeMintInstructionData) {
+}: any) {
   const keys = [
     { pubkey: mint, isSigner: false, isWritable: true },
     { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },

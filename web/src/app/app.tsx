@@ -19,7 +19,7 @@ import LoadingIndicator from './components/LoadingIndicator';
 import DialogForm from './components/DialogForm';
 import NavigationFrame from './components/NavigationFrame';
 import { ConnectionProvider } from './utils/connection';
-import { useWallet, WalletProvider } from './utils/wallet';
+import { useWallet, WalletProvider } from './utils/wallet.js';
 import { ConnectedWalletsProvider } from './utils/connected-wallets';
 // import { TokenRegistryProvider } from './utils/tokens/names';
 import { isExtension } from './utils/utils';
@@ -29,7 +29,7 @@ import LoginPage from './pages/LoginPage';
 // // @ts-ignore
 // import ConnectionsPage from './pages/ConnectionsPage';
 // // @ts-ignore
-// import WalletPage from './pages/WalletPage';
+import WalletPage from './pages/WalletPage.js';
 import { PageProvider, usePage } from './utils/page';
 
 export function App() {
@@ -111,8 +111,7 @@ function PageContents() {
     return <div>Pop up page</div>;
   }
   if (page === 'wallet') {
-    //return <WalletPage />;
-    return <div>Wallet page</div>;
+    return <WalletPage />;
   } else if (page === 'connections') {
     // return <ConnectionsPage />;
     return <div>Connections page</div>;

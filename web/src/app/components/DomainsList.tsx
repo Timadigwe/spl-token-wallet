@@ -17,7 +17,7 @@ import {
   Modal,
   Theme,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from 'tss-react/mui';
 import LoadingIndicator from './LoadingIndicator';
 import SendIcon from '@mui/icons-material/Send';
 import { useUserDomains } from '../utils/name-service';
@@ -33,57 +33,59 @@ import { transferNameOwnership } from '@bonfida/spl-name-service';
 import { useConnection } from '../utils/connection';
 // @ts-ignore
 import { useWallet } from '../utils/wallet';
-// import { refreshCache } from '../utils/fetch-loop';
-// import tuple from 'immutable-tuple';
+import { refreshCache } from '../utils/fetch-loop';
+import tuple from 'immutable-tuple';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  address: {
-    textOverflow: 'ellipsis',
-    overflowX: 'hidden',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'space-evenly',
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  itemDetails: {
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
-    marginBottom: theme.spacing(2),
-  },
-  text: {
-    color: 'white',
-    fontSize: 24,
-    marginTop: '2%',
-    marginBottom: '2%',
-    opacity: 0.8,
-  },
-  input: {
-    color: 'white',
-    fontWeight: 600,
-    width: 500,
-  },
-  transferContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  paper: {
-    width: '50%',
-    height: '80%',
-    overflowY: 'scroll',
-  },
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-}));
+const useStyles = makeStyles()((theme: Theme) => {
+  return {
+    address: {
+      textOverflow: 'ellipsis',
+      overflowX: 'hidden',
+    },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'space-evenly',
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+    },
+    itemDetails: {
+      marginLeft: theme.spacing(3),
+      marginRight: theme.spacing(3),
+      marginBottom: theme.spacing(2),
+    },
+    text: {
+      color: 'white',
+      fontSize: 24,
+      marginTop: '2%',
+      marginBottom: '2%',
+      opacity: 0.8,
+    },
+    input: {
+      color: 'white',
+      fontWeight: 600,
+      width: 500,
+    },
+    transferContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 10,
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+    },
+    paper: {
+      width: '50%',
+      height: '80%',
+      overflowY: 'scroll',
+    },
+    modal: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  };
+});
 
 const TransferDialog = ({
   domainName,
@@ -94,11 +96,11 @@ const TransferDialog = ({
   open: boolean;
   setOpen: (args: boolean) => void;
 }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const connection = useConnection();
   const wallet = useWallet();
   const [checked, setChecked] = useState(false);
-  const [newOwner, setNewOwner] = useState<string | null>(null);
+  const [newOwner, setNewOwner] = useState<any>();
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -139,7 +141,7 @@ const TransferDialog = ({
         variant: 'error',
       });
     } finally {
-      //refreshCache(tuple('useUserDomain', wallet?.publicKey?.toBase58()));
+      refreshCache(tuple('useUserDomain', wallet?.publicKey?.toBase58()));
       setLoading(false);
     }
   };
@@ -204,7 +206,7 @@ const TransferDialog = ({
 };
 
 const DomainListItemDetails = ({ domainName }: { domainName: string }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [transferVisible, setTransferVisible] = useState(false);
   return (
     <>
@@ -247,7 +249,7 @@ const DomainListItem = ({
   domainName: string;
   domainKey: PublicKey;
 }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -270,21 +272,21 @@ const DomainListItem = ({
 };
 
 const DomainsList = () => {
-  // const [userDomains, userDomainsLoaded] = useUserDomains();
-  // if (!userDomainsLoaded) {
-  //   return <LoadingIndicator />;
-  // }
-  // if (userDomainsLoaded && userDomains?.length === 0) {
-  //   return (
-  //     <Typography variant="body1" align="center">
-  //       You don't own any domain
-  //     </Typography>
-  //   );
-  // }
+  const [userDomains, userDomainsLoaded] = useUserDomains();
+  if (!userDomainsLoaded) {
+    return <LoadingIndicator />;
+  }
+  if (userDomainsLoaded && userDomains?.length === 0) {
+    return (
+      <Typography variant="body1" align="center">
+        You don't own any domain
+      </Typography>
+    );
+  }
   return (
     <>
       <List>
-        {/* {userDomains?.map((d) => {
+        {userDomains?.map((d) => {
           return (
             <DomainListItem
               key={d.nameKey.toBase58()}
@@ -292,7 +294,7 @@ const DomainsList = () => {
               domainKey={d.nameKey}
             />
           );
-        })} */}
+        })}
       </List>
     </>
   );
@@ -305,7 +307,7 @@ const DomainDialog = ({
   open: boolean;
   setOpen: (arg: boolean) => void;
 }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   return (
     <Modal open={open} onClose={() => setOpen(false)} className={classes.modal}>
       <Paper className={classes.paper}>

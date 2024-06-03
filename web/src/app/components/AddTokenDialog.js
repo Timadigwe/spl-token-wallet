@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogContent,
   TextField,
-  makeStyles,
   Tab,
   Tabs,
   List,
@@ -15,7 +14,7 @@ import {
   ListItemIcon,
   Link,
 } from '@mui/material';
-
+import { makeStyles } from 'tss-react/mui';
 import {
   refreshWalletPublicKeys,
   useWallet,
@@ -42,12 +41,14 @@ const feeFormat = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 6,
 });
 
-const useStyles = makeStyles((theme) => ({
-  tabs: {
-    marginBottom: theme.spacing(1),
-    borderBottom: `1px solid ${theme.palette.background.paper}`,
-  },
-}));
+const useStyles = makeStyles((theme) => {
+  return {
+    tabs: {
+      marginBottom: theme.spacing(1),
+      borderBottom: `1px solid ${theme.palette.background.paper}`,
+    },
+  };
+});
 
 export default function AddTokenDialog({ open, onClose }) {
   let wallet = useWallet();

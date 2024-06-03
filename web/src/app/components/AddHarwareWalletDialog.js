@@ -14,7 +14,7 @@ import {
   AccountsSelector,
   DerivationPathMenuItem,
   toDerivationPath,
-} from '../pages/LoginPage.js';
+} from '../pages/LoginPage';
 import { useSnackbar } from 'notistack';
 
 const AddHardwareView = {

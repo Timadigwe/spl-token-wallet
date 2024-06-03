@@ -31,11 +31,12 @@ import CodeIcon from '@mui/icons-material/Code';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import { MonetizationOn, OpenInNew } from '@mui/icons-material';
 import SolanaIcon from './SolanaIcon';
-//import { useWalletSelector } from '../utils/wallet';
-//import DeleteMnemonicDialog from './DeleteMnemonicDialog';
-// import AddHardwareWalletDialog from './AddHarwareWalletDialog';
-// import { ExportMnemonicDialog } from './ExportAccountDialog.js';
-import AddCustomClusterDialog from './AddCustomClusterDialog';
+import { useWalletSelector } from '../utils/wallet';
+import DeleteMnemonicDialog from './DeleteMnemonicDialog';
+import AddHardwareWalletDialog from './AddHarwareWalletDialog';
+import { ExportMnemonicDialog } from './ExportAccountDialog.js';
+// @ts-ignore
+import AddCustomClusterDialog from './AddCustomClusterDialog.js';
 import {
   isExtension,
   isExtensionPopup,
@@ -44,6 +45,7 @@ import {
 import ConnectionIcon from './ConnectionIcon';
 import { useConnectedWallets } from '../utils/connected-wallets';
 import { usePage } from '../utils/page';
+import AddAccountDialog from './AddAccountDialog';
 
 const useStyles = makeStyles()((theme: Theme) => {
   return {
@@ -223,7 +225,7 @@ function NetworkSelector() {
       <AddCustomClusterDialog
         open={addCustomNetworkOpen}
         onClose={() => setCustomNetworkOpen(false)}
-        onAdd={({ name, apiUrl }) => {
+        onAdd={({ name, apiUrl }: any) => {
           addCustomCluster(name, apiUrl);
           setCustomNetworkOpen(false);
         }}
@@ -296,14 +298,14 @@ function NetworkSelector() {
 }
 
 function WalletSelector() {
-  // const {
-  //   accounts,
-  //   derivedAccounts,
-  //   hardwareWalletAccount,
-  //   setHardwareWalletAccount,
-  //   setWalletSelector,
-  //   addAccount,
-  // } = useWalletSelector();
+  const {
+    accounts,
+    derivedAccounts,
+    hardwareWalletAccount,
+    setHardwareWalletAccount,
+    setWalletSelector,
+    addAccount,
+  } = useWalletSelector();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [addAccountOpen, setAddAccountOpen] = useState<boolean>(false);
   const [addHardwareWalletDialogOpen, setAddHardwareWalletDialogOpen] =
@@ -312,15 +314,15 @@ function WalletSelector() {
   const [exportMnemonicOpen, setExportMnemonicOpen] = useState<boolean>(false);
   const { classes } = useStyles();
 
-  // if (accounts.length === 0) {
-  //   return null;
-  // }
+  if (accounts.length === 0) {
+    return null;
+  }
   return (
     <>
-      {/* <AddHardwareWalletDialog
+      <AddHardwareWalletDialog
         open={addHardwareWalletDialogOpen}
         onClose={() => setAddHardwareWalletDialogOpen(false)}
-        onAdd={({ publicKey, derivationPath, account, change }) => {
+        onAdd={({ publicKey, derivationPath, account, change }: any) => {
           setHardwareWalletAccount({
             name: 'Hardware wallet',
             publicKey,
@@ -339,11 +341,11 @@ function WalletSelector() {
             change,
           });
         }}
-      /> */}
-      {/* <AddAccountDialog
+      />
+      <AddAccountDialog
         open={addAccountOpen}
         onClose={() => setAddAccountOpen(false)}
-        onAdd={({ name, importedAccount }) => {
+        onAdd={({ name, importedAccount }: any) => {
           addAccount({ name, importedAccount });
           setWalletSelector({
             walletIndex: importedAccount ? undefined : derivedAccounts.length,
@@ -354,15 +356,15 @@ function WalletSelector() {
           });
           setAddAccountOpen(false);
         }}
-      /> */}
-      {/* <ExportMnemonicDialog
+      />
+      <ExportMnemonicDialog
         open={exportMnemonicOpen}
         onClose={() => setExportMnemonicOpen(false)}
       />
       <DeleteMnemonicDialog
         open={deleteMnemonicOpen}
         onClose={() => setDeleteMnemonicOpen(false)}
-      /> */}
+      />
       <Hidden xsDown>
         <Button
           color="inherit"
@@ -396,15 +398,15 @@ function WalletSelector() {
         }}
         //getContentAnchorEl={null}
       >
-        {/* {accounts.map((account) => (
+        {accounts.map((account: any) => (
           <AccountListItem
             account={account}
             classes={classes}
             setAnchorEl={setAnchorEl}
             setWalletSelector={setWalletSelector}
           />
-        ))} */}
-        {/* {hardwareWalletAccount && (
+        ))}
+        {hardwareWalletAccount && (
           <>
             <Divider />
             <AccountListItem
@@ -414,7 +416,7 @@ function WalletSelector() {
               setWalletSelector={setWalletSelector}
             />
           </>
-        )} */}
+        )}
         <Divider />
         <MenuItem onClick={() => setAddHardwareWalletDialogOpen(true)}>
           <ListItemIcon className={classes.menuItemIcon}>
@@ -489,26 +491,31 @@ function Footer() {
   );
 }
 
-// function AccountListItem({ account, classes, setAnchorEl, setWalletSelector }) {
-//   return (
-//     <MenuItem
-//       key={account.address.toBase58()}
-//       onClick={() => {
-//         setAnchorEl(null);
-//         setWalletSelector(account.selector);
-//       }}
-//       selected={account.isSelected}
-//       component="div"
-//     >
-//       <ListItemIcon className={classes.menuItemIcon}>
-//         {account.isSelected ? <CheckIcon fontSize="small" /> : null}
-//       </ListItemIcon>
-//       <div style={{ display: 'flex', flexDirection: 'column' }}>
-//         <Typography>{account.name}</Typography>
-//         <Typography color="textSecondary">
-//           {account.address.toBase58()}
-//         </Typography>
-//       </div>
-//     </MenuItem>
-//   );
-// }
+function AccountListItem({
+  account,
+  classes,
+  setAnchorEl,
+  setWalletSelector,
+}: any) {
+  return (
+    <MenuItem
+      key={account.address.toBase58()}
+      onClick={() => {
+        setAnchorEl(null);
+        setWalletSelector(account.selector);
+      }}
+      selected={account.isSelected}
+      component="div"
+    >
+      <ListItemIcon className={classes.menuItemIcon}>
+        {account.isSelected ? <CheckIcon fontSize="small" /> : null}
+      </ListItemIcon>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <Typography>{account.name}</Typography>
+        <Typography color="textSecondary">
+          {account.address.toBase58()}
+        </Typography>
+      </div>
+    </MenuItem>
+  );
+}

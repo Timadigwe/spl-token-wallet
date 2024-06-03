@@ -1,24 +1,26 @@
 import React from 'react';
 import { Container, Grid } from '@mui/material';
 import BalancesList from '../components/BalancesList';
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from 'tss-react/mui';
 import { useIsExtensionWidth } from '../utils/utils';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    [theme.breakpoints.down(theme.ext)]: {
-      padding: 0,
+const useStyles = makeStyles()((theme) => {
+  return {
+    container: {
+      [theme.breakpoints.down(theme.ext)]: {
+        padding: 0,
+      },
+      [theme.breakpoints.up(theme.ext)]: {
+        maxWidth: 'md',
+      },
     },
-    [theme.breakpoints.up(theme.ext)]: {
-      maxWidth: 'md',
+    balancesContainer: {
+      [theme.breakpoints.down(theme.ext)]: {
+        marginBottom: 24,
+      },
     },
-  },
-  balancesContainer: {
-    [theme.breakpoints.down(theme.ext)]: {
-      marginBottom: 24,
-    },
-  },
-}));
+  };
+});
 
 export default function WalletPage() {
   const classes = useStyles();

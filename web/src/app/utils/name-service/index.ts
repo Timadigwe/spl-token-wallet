@@ -124,30 +124,30 @@ export async function performReverseLookup(
 }
 
 export const useUserDomains = () => {
-  // const wallet = useWallet();
-  // const connection = useConnection();
-  // const fn = async () => {
-  //   const domains = await findOwnedNameAccountsForUser(
-  //     connection,
-  //     wallet.publicKey
-  //   );
-  //   const names: Name[] = [];
-  //   const fn = async (d: PublicKey) => {
-  //     try {
-  //       const name = await performReverseLookup(connection, d);
-  //       names.push({ name: name, nameKey: d });
-  //     } catch (err) {
-  //       console.log(`Passing account ${d.toBase58()} - err ${err}`);
-  //     }
-  //   };
-  //   const promises = domains.map((d) => fn(d));
-  //   await Promise.allSettled(promises);
-  //   return names.sort((a, b) => {
-  //     return a.name.localeCompare(b.name);
-  //   });
-  // };
-  // return useAsyncData(
-  //   fn,
-  //   tuple('useUserDomain', wallet?.publicKey?.toBase58())
-  // );
+  const wallet = useWallet();
+  const connection = useConnection();
+  const fn = async () => {
+    const domains = await findOwnedNameAccountsForUser(
+      connection,
+      wallet.publicKey
+    );
+    const names: Name[] = [];
+    const fn = async (d: PublicKey) => {
+      try {
+        const name = await performReverseLookup(connection, d);
+        names.push({ name: name, nameKey: d });
+      } catch (err) {
+        console.log(`Passing account ${d.toBase58()} - err ${err}`);
+      }
+    };
+    const promises = domains.map((d) => fn(d));
+    await Promise.allSettled(promises);
+    return names.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+  };
+  return useAsyncData(
+    fn,
+    tuple('useUserDomain', wallet?.publicKey?.toBase58())
+  );
 };

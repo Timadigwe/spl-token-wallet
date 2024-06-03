@@ -1,24 +1,21 @@
 import React, { useRef } from 'react';
-import {
-  TextField,
-  makeStyles,
-  DialogContent,
-  IconButton,
-  Dialog,
-} from '@mui/material';
+import { TextField, DialogContent, IconButton, Dialog } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
 import CopyIcon from 'mdi-material-ui/ContentCopy';
 import { useSnackbar } from 'notistack';
 import QrcodeIcon from 'mdi-material-ui/Qrcode';
 import QRCode from 'qrcode.react';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-    alignItems: 'baseline',
-  },
-}));
+const useStyles = makeStyles()((theme) => {
+  return {
+    root: {
+      display: 'flex',
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      alignItems: 'baseline',
+    },
+  };
+});
 
 export default function CopyableDisplay({
   value,
@@ -29,7 +26,7 @@ export default function CopyableDisplay({
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const textareaRef = useRef();
-  const classes = useStyles();
+  const { classes } = useStyles();
   const copyLink = () => {
     let textArea = textareaRef.current;
     if (textArea) {
@@ -65,18 +62,20 @@ export default function CopyableDisplay({
   );
 }
 
-const useQrCodeStyles = makeStyles((theme) => ({
-  qrcodeContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: theme.spacing(2),
-  },
-}));
+const useQrCodeStyles = makeStyles()((theme) => {
+  return {
+    qrcodeContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      marginBottom: theme.spacing(2),
+    },
+  };
+});
 
 function Qrcode({ value }) {
   const [showQrcode, setShowQrcode] = React.useState(false);
-  const classes = useQrCodeStyles();
+  const { classes } = useQrCodeStyles();
 
   return (
     <>

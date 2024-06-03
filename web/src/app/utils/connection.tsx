@@ -20,10 +20,12 @@ const ConnectionContext = React.createContext<{
   connection: Connection;
 } | null>(null);
 
-export const MAINNET_URL = 'https://solana-api.projectserum.com';
+export const MAINNET_URL =
+  'https://black-red-diagram.solana-mainnet.quiknode.pro/8d9d8dd1ac14594b29ec452f8cd64a49087309e1/';
 // No backup url for now. Leave the variable to not break wallets that
 // have saved the url in their local storage, previously.
-export const MAINNET_BACKUP_URL = 'https://solana-api.projectserum.com/';
+export const MAINNET_BACKUP_URL =
+  'https://black-red-diagram.solana-mainnet.quiknode.pro/8d9d8dd1ac14594b29ec452f8cd64a49087309e1/';
 
 export function ConnectionProvider({ children }: ConnectionProviderProps) {
   const [endpoint, setEndpoint] = useLocalStorageState(
