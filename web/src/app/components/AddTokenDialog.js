@@ -41,7 +41,7 @@ const feeFormat = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 6,
 });
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles()((theme) => {
   return {
     tabs: {
       marginBottom: theme.spacing(1),
@@ -56,7 +56,7 @@ export default function AddTokenDialog({ open, onClose }) {
     wallet.tokenAccountCost,
     wallet.tokenAccountCost
   );
-  let classes = useStyles();
+  let { classes } = useStyles();
   let updateTokenName = useUpdateTokenName();
   const [sendTransaction, sending] = useSendTransaction();
 

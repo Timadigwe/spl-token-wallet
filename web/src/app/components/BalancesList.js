@@ -40,7 +40,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import MergeType from '@mui/icons-material/MergeType';
 import SortIcon from '@mui/icons-material/Sort';
 import DeleteIcon from '@mui/icons-material/Delete';
-// import AddTokenDialog from './AddTokenDialog';
+import AddTokenDialog from './AddTokenDialog';
 // import ExportAccountDialog from './ExportAccountDialog';
 import ftxPayIcon from './FtxPay/icon.png';
 // import SendDialog from './SendDialog';
@@ -341,10 +341,10 @@ export default function BalancesList() {
         ))}
         {loaded ? null : <LoadingIndicator />}
       </List>
-      {/* <AddTokenDialog
+      <AddTokenDialog
         open={showAddTokenDialog}
         onClose={() => setShowAddTokenDialog(false)}
-      /> */}
+      />
       {/* <FtxPayDialog
         open={showFtxPayDialog}
         publicKeys={publicKeys}

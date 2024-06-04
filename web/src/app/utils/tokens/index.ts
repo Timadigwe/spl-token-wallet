@@ -250,9 +250,10 @@ export async function findAssociatedTokenAddress(
   walletAddress: any,
   tokenMintAddress: any
 ) {
+  const pubkey = new PublicKey(walletAddress);
   return PublicKey.findProgramAddressSync(
     [
-      walletAddress.toBuffer(),
+      pubkey.toBuffer(),
       TokenInstructions.TOKEN_PROGRAM_ID.toBuffer(),
       tokenMintAddress.toBuffer(),
     ],
