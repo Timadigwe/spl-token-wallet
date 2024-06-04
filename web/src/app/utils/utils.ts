@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { EventEmitter } from 'events';
+import base58 from 'bs58';
 
 export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -80,6 +81,18 @@ export function useIsExtensionWidth() {
 export const isExtension = window.location.protocol === 'chrome-extension:';
 
 export const isExtensionPopup = isExtension && window.opener;
+
+export const decodeAccount = (privateKey: string) => {
+  try {
+    return Keypair.fromSecretKey(new Uint8Array(JSON.parse(privateKey)));
+  } catch (_) {
+    try {
+      return Keypair.fromSecretKey(new Uint8Array(base58.decode(privateKey)));
+    } catch (_) {
+      return undefined;
+    }
+  }
+};
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {

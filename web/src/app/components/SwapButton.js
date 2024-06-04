@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import SwapHoriz from '@mui/icons-material/SwapHoriz';
 import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
-// import Swap from '@project-serum/swap-ui';
+import Swap from './swap-ui';
 import { Provider } from '@project-serum/anchor';
 import { TokenListContainer } from '@solana/spl-token-registry';
 import { useTokenInfos } from '../utils/tokens/names';
@@ -55,14 +55,14 @@ function SwapButtonDialog({ size }) {
             height: '100%',
           }}
         >
-          {/* <Swap
+          <Swap
             provider={provider}
             tokenList={tokenList}
             containerStyle={{
               width: '100%',
               boxShadow: 'none',
             }}
-          /> */}
+          />
           <DialogActions>
             <Button onClick={() => setDialogOpen(false)}>Close</Button>
           </DialogActions>
@@ -99,15 +99,15 @@ function SwapButtonPopover({ size }) {
                 vertical: 'top',
                 horizontal: 'right',
               }}
-              PaperProps={{ style: { borderRadius: '10px' } }}
+              slotProps={{ style: { borderRadius: '10px' } }}
               disableRestoreFocus
               keepMounted
             >
-              {/* <Swap
+              <Swap
                 provider={provider}
                 tokenList={tokenList}
                 containerStyle={{ width: '432px' }}
-              /> */}
+              />
             </Popover>
           </div>
         )}
@@ -145,20 +145,20 @@ class NotifyingProvider extends Provider {
           return;
         }
 
-        //const tx = txs[index];
-        // try {
-        //   const superSendResult = super.send(tx.tx, tx.signers, opts);
-        //   const sig = await new Promise((onSuccess, onError) => {
-        //     sendTransaction(superSendResult, {
-        //       onSuccess,
-        //       onError,
-        //     });
-        //   });
-        //   txSigs.push(sig);
-        //   processTx(index + 1);
-        // } catch (error) {
-        //   reject(error);
-        // }
+        const tx = txs[index];
+        try {
+          const superSendResult = super.send(tx.tx, tx.signers, opts);
+          const sig = await new Promise((onSuccess, onError) => {
+            sendTransaction(superSendResult, {
+              onSuccess,
+              onError,
+            });
+          });
+          txSigs.push(sig);
+          processTx(index + 1);
+        } catch (error) {
+          reject(error);
+        }
       };
 
       processTx(0);

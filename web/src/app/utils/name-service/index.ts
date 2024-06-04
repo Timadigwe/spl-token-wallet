@@ -127,10 +127,8 @@ export const useUserDomains = () => {
   const wallet = useWallet();
   const connection = useConnection();
   const fn = async () => {
-    const domains = await findOwnedNameAccountsForUser(
-      connection,
-      wallet.publicKey
-    );
+    const pubkey = new PublicKey(wallet.publickey);
+    const domains = await findOwnedNameAccountsForUser(connection, pubkey);
     const names: Name[] = [];
     const fn = async (d: PublicKey) => {
       try {
@@ -146,8 +144,6 @@ export const useUserDomains = () => {
       return a.name.localeCompare(b.name);
     });
   };
-  return useAsyncData(
-    fn,
-    tuple('useUserDomain', wallet?.publicKey?.toBase58())
-  );
+  const pubkey = new PublicKey(wallet.publicKey);
+  return useAsyncData(fn, tuple('useUserDomain', pubkey.toBase58()));
 };

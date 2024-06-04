@@ -609,7 +609,7 @@ export const DerivationPathMenuItem = {
   Bip44Root: 3, // Ledger only.
 };
 
-function toDerivationPath(
+export function toDerivationPath(
   dPathMenuItem: DerivationPathMenuItemType
 ): DerivationPath | undefined {
   switch (dPathMenuItem) {
